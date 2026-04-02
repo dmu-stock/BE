@@ -17,11 +17,9 @@ public enum ErrorType implements ErrorCode {
 
     INVALID_UUID("IU404", HttpStatus.NOT_FOUND, "이메일 인증에 실패하였습니다. 다시 인증해 주시기 바랍니다."),
 
-    UNSET_PROPERTY("V400", HttpStatus.BAD_REQUEST, "요청 값이 올바르지 않습니다."),
+    UNSET_PROPERTY("V400", HttpStatus.BAD_REQUEST, "요청 값이 올바르지 않습니다.");
 
-    CARTITEM_NOT_FOUND("CI404", HttpStatus.NOT_FOUND, "장바구니가 비어있습니다."),
-    CARTID_NOT_MATCH("CIM404", HttpStatus.NOT_FOUND, "장바구니가 일치하지않습습니다."),
-    CART_NOT_FOUND("C404", HttpStatus.NOT_FOUND, "해당 유저의 장바구니가 존재하지 않습니다.");
+
     private final String code;
     private final HttpStatus status;
     private final String desc;
