@@ -1,4 +1,4 @@
-package com.dmu.stock.entiry.enums;
+package com.dmu.stock.entity.enums;
 
 public enum StockType {
     Korea,

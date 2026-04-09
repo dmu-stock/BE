@@ -1,7 +1,9 @@
-package com.dmu.stock.entiry;
+package com.dmu.stock.entity;
 
-import com.dmu.stock.entiry.enums.StockType;
+import com.dmu.stock.entity.enums.StockType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,7 +11,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class UserStock {
 
     @Id
@@ -18,9 +22,9 @@ public class UserStock {
 
     private String stockCode; // 종목코드
 
-    private int avgPrice; // 평단가
+    private double avgPrice; // 평단가
 
-    private int quantity; //수량
+    private double quantity; //수량
 
     @Enumerated(EnumType.STRING)
     private StockType type; //국내, 미국주식 구분
@@ -28,7 +32,12 @@ public class UserStock {
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 
 }
