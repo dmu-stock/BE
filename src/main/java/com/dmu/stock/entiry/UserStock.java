@@ -1,0 +1,34 @@
+package com.dmu.stock.entiry;
+
+import com.dmu.stock.entiry.enums.StockType;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Getter
+@NoArgsConstructor
+public class UserStock {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String stockCode; // 종목코드
+
+    private int avgPrice; // 평단가
+
+    private int quantity; //수량
+
+    @Enumerated(EnumType.STRING)
+    private StockType type; //국내, 미국주식 구분
+
+    private LocalDateTime createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+}
