@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,9 +22,16 @@ public class AnalyzeNewsService {
     private final NaverNewsClient naverNewsClient;
     private final FastApiClient fastApiClient;
 
-    public List<String> getNewsByName(String stockCode) {
-        List<String> urls = naverNewsClient.searchNewsName(stockCode);
-        return urls;
+    public List<String> getNewsByName(List<String> stockCodes) {
+        List<String> allUrls = new ArrayList<>();
+
+        for (String code : stockCodes) {
+            List<String> urlsPerStock = naverNewsClient.searchNewsName(code);
+
+            allUrls.addAll(urlsPerStock);
+        }
+        //distinct : 중복 걸러줌
+        return allUrls.stream().distinct().toList();
     }
 
     /**

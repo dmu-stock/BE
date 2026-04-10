@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 
 @Getter
 @Setter
@@ -22,10 +24,10 @@ public class StockRequestDto {
     private String stockCode;
 
     @Positive(message = "평단가는 0보다 커야 합니다.")
-    private double avgPrice;
+    private BigDecimal avgPrice;
 
     @Positive(message = "수량은 0보다 커야 합니다.")
-    private double quantity;
+    private BigDecimal quantity;
 
     @NotNull(message = "주식 타입(KOREA/USA)은 필수입니다.")
     private StockType type;

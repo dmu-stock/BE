@@ -25,7 +25,7 @@ public class AnalyzeNewsController {
      * @return
      */
     @GetMapping("/{stockCode}")
-    public ResponseEntity<ApiResponse<List<String>>> getStockNews(@PathVariable String stockCode){
+    public ResponseEntity<ApiResponse<List<String>>> getStockNews(@PathVariable List<String> stockCode){
         List<String> stockNews = analyzeNewsService.getNewsByName(stockCode);
         return ResponseEntity.ok(ApiResponse.success(SuccessType.INQUERY_SUCCESS,stockNews));
     }

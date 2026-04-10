@@ -43,7 +43,6 @@ public class StockController {
                 .map(summary -> ResponseEntity.ok(
                         ApiResponse.success(SuccessType.INQUERY_SUCCESS, summary)
                 ));
-
     }
 
 }

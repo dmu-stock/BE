@@ -32,4 +32,11 @@ public class MemberStockController {
         List<StockResponseDto> getStockList = memberStockService.getMemberStock(memberId);
         return ResponseEntity.ok(ApiResponse.success(SuccessType.INQUERY_SUCCESS,getStockList));
     }
+    @GetMapping("/analyze/{memberId}")
+    public Mono<ResponseEntity<ApiResponse<String>>> getMyStockAnalysis(@PathVariable String memberId){
+        return memberStockService.getMyStockAnalysis(memberId) // Mono<String>이 넘어옴
+                .map(summary -> ResponseEntity.ok(
+                        ApiResponse.success(SuccessType.INQUERY_SUCCESS, summary)
+                ));
+    }
 }
