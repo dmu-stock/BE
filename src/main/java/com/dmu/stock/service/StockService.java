@@ -22,7 +22,6 @@ import java.util.List;
 public class StockService {
 
     private final HantuClient hantuClient;
-    private final AuthService authService;
     private final NaverNewsClient naverNewsClient;
     private final FastApiClient fastApiClient;
 
@@ -32,9 +31,8 @@ public class StockService {
      * @return
      */
     public HantuDto.PriceResponse getStockInfo(String stockCode){
-        String validToken = authService.getValidToken();
-        HantuDto.PriceResponse stockPrice = hantuClient.getStockPrice(stockCode, validToken);
-        return stockPrice;
+        String validToken = hantuClient.getValidToken();
+        return hantuClient.getStockPrice(stockCode, validToken);
     }
 
     /**
@@ -53,12 +51,6 @@ public class StockService {
                     .stockCode(requestDto.getCode())
                     .build();
         }
-
-        Mono<String> response = fastApiClient.fastapiWebClient().post()
-                .uri("/api/v1/StockAnalysis")
-                .bodyValue(stockAnalysisRequestDto)
-                .retrieve()
-                .bodyToMono(String.class);
-        return response;
+        return fastApiClient.analyzeStock(stockAnalysisRequestDto);
     }
 }

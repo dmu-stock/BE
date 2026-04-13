@@ -2,6 +2,7 @@ package com.dmu.stock.client.naver;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -12,10 +13,9 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class NaverNewsClient {
 
-    private final WebClient webClient;
+    private final WebClient naverWebClient;
 
     @Value("${naver.client.id}")
     private String clientId;
@@ -23,16 +23,19 @@ public class NaverNewsClient {
     @Value("${naver.client.secret}")
     private String clientSecret;
 
+    // Qualifier를 사용하여 네이버 전용 빈을 명시적으로 가져옵니다.
+    public NaverNewsClient(@Qualifier("naverWebClient") WebClient naverWebClient) {
+        this.naverWebClient = naverWebClient;
+    }
+
     /**
      * 종목명으로 뉴스 검색 후 URL 리스트 반환
      */
     public List<String> searchNewsName(String stockName) {
         log.info("네이버 뉴스 검색 API 호출 - 키워드: {}", stockName);
 
-        NaverNewsResponseDto response = webClient.get()
+        NaverNewsResponseDto response = naverWebClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .scheme("https")
-                        .host("openapi.naver.com")
                         .path("/v1/search/news.json")
                         .queryParam("query", stockName)
                         .queryParam("display", 10) // 5개
@@ -63,10 +66,8 @@ public class NaverNewsClient {
     public List<String> searchNews(String query, int display, String sort) {
         log.info("네이버 뉴스 검색 API 호출 - 키워드: {}, 개수: {}, 정렬: {}", query, display, sort);
 
-        NaverNewsResponseDto response = webClient.get()
+        NaverNewsResponseDto response = naverWebClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .scheme("https")
-                        .host("openapi.naver.com")
                         .path("/v1/search/news.json")
                         .queryParam("query", query)
                         .queryParam("display", display) // 5개

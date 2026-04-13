@@ -4,6 +4,7 @@ import com.dmu.stock.client.fastapi.FastApiClient;
 import com.dmu.stock.client.hantu.HantuClient;
 import com.dmu.stock.client.naver.NaverNewsClient;
 import com.dmu.stock.client.naver.NewsAnalysisRequestDto;
+import com.dmu.stock.config.WebClientConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,6 @@ import java.util.List;
 public class AnalyzeNewsService {
 
     private final HantuClient hantuClient;
-    private final AuthService authService;
     private final NaverNewsClient naverNewsClient;
     private final FastApiClient fastApiClient;
 
@@ -47,11 +47,6 @@ public class AnalyzeNewsService {
                 .urls(urls)
                 .build();
 
-        Mono<String> response = fastApiClient.fastapiWebClient().post()
-                .uri("/api/v1/NewsAnalysis")
-                .bodyValue(requestDto)
-                .retrieve()
-                .bodyToMono(String.class); // 요약본 반환 타입
-        return response;
+        return fastApiClient.analyzeNews(requestDto);
     }
 }

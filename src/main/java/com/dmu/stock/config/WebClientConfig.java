@@ -34,4 +34,38 @@ public class WebClientConfig {
                 .build();
     }
 
+    @Bean
+    public WebClient dartWebClient(WebClient.Builder builder) {
+        return WebClient.builder()
+                .baseUrl("https://opendart.fss.or.kr")
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
+    }
+
+    @Bean
+    public WebClient fastapiWebClient(WebClient.Builder builder) {
+        return WebClient.builder()
+                .baseUrl("http://localhost:8000") // FastAPI 서버 주소
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
+    }
+
+    // 한국투자증권 API용 클라이언트
+    @Bean
+    public WebClient hantuWebClient(WebClient.Builder builder) {
+        return builder
+                .baseUrl("https://openapi.koreainvestment.com:9443")
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                .build();
+    }
+
+    // 네이버 뉴스 검색 API용 클라이언트
+    @Bean
+    public WebClient naverWebClient(WebClient.Builder builder) {
+        return builder
+                .baseUrl("https://openapi.naver.com")
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
+    }
+
 }

@@ -84,6 +84,7 @@ public class MemberStockService {
 
     @Transactional
     public Mono<String> getMyStockAnalysis(String memberId){
+        // 2. FastAPI와 비동기 통신
         return Mono.fromCallable(() -> {
         List<StockResponseDto> memberStock = getMemberStock(memberId);
                     System.out.println("======= 내 주식 리스트 확인 =======");
@@ -105,13 +106,7 @@ public class MemberStockService {
                 .newsForRag(newsForRag)
                 .build();
         }).subscribeOn(Schedulers.boundedElastic())
-                .flatMap(requestRag ->
-                        // 2. FastAPI와 비동기 통신
-                        fastApiClient.fastapiWebClient().post()
-                                .uri("/api/v1/rag/NewsAnalysis")
-                                .bodyValue(requestRag)
-                                .retrieve()
-                                .bodyToMono(String.class)
+                .flatMap(fastApiClient::analyzeMyStock
                 );
     }
 }
