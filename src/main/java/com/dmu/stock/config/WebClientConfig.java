@@ -36,7 +36,7 @@ public class WebClientConfig {
 
     @Bean
     public WebClient dartWebClient(WebClient.Builder builder) {
-        return WebClient.builder()
+        return builder
                 .baseUrl("https://opendart.fss.or.kr")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
@@ -44,8 +44,12 @@ public class WebClientConfig {
 
     @Bean
     public WebClient fastapiWebClient(WebClient.Builder builder) {
-        return WebClient.builder()
+
+        HttpClient longTimeOutClient = HttpClient.create()
+                .responseTimeout(Duration.ofSeconds(60));
+        return builder
                 .baseUrl("http://localhost:8000") // FastAPI 서버 주소
+                .clientConnector(new ReactorClientHttpConnector(longTimeOutClient))
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }

@@ -19,6 +19,7 @@ public class DartApiClient {
     @Value("${dart.api.key}")
     private String dartApiKey;
 
+    //Qualifier : bean 이름표 붙여줌
     public DartApiClient(@Qualifier("dartWebClient") WebClient dartWebClient) {
         this.dartWebClient = dartWebClient;
     }

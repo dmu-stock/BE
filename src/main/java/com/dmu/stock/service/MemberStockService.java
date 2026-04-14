@@ -82,6 +82,7 @@ public class MemberStockService {
                 .toList();
     }
 
+    //동기식 메서드를 비동기 래퍼로 감싸는 작업
     @Transactional
     public Mono<String> getMyStockAnalysis(String memberId){
         // 2. FastAPI와 비동기 통신
@@ -105,6 +106,7 @@ public class MemberStockService {
                 .memberStock(memberStock)
                 .newsForRag(newsForRag)
                 .build();
+        //리소스 병목 현상 방지 :
         }).subscribeOn(Schedulers.boundedElastic())
                 .flatMap(fastApiClient::analyzeMyStock
                 );
