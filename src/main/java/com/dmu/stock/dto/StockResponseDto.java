@@ -18,6 +18,7 @@ public class StockResponseDto {
     private BigDecimal avgPrice;    // 평단가
     private BigDecimal quantity;    // 수량
     private String totalAmount; // 총 매수 금액
+    private StockType type; //주식 타입
 //    private String message;
 
     public static String formatBigDecimal(BigDecimal value) {

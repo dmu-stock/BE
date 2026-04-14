@@ -14,7 +14,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NodeStockRequestDto {
-    private String code;
-    //해외 주식 여부 코드(true = 미국주식)
-    private boolean overseas;
+    private String stock;
 }

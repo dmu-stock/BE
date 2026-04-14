@@ -6,6 +6,7 @@ import com.dmu.stock.dto.StockRequestDto;
 import com.dmu.stock.dto.StockResponseDto;
 import com.dmu.stock.entity.Member;
 import com.dmu.stock.entity.UserStock;
+import com.dmu.stock.entity.enums.StockType;
 import com.dmu.stock.exception.CustomException;
 import com.dmu.stock.exception.ErrorType;
 import com.dmu.stock.repository.MemberRepository;
@@ -51,6 +52,7 @@ public class MemberStockService {
                 .stockCode(request.getStockCode())
                 .avgPrice(request.getAvgPrice())
                 .quantity(request.getQuantity())
+                .type(StockType.detectType(request.getStockCode()))
                 .member(member)
                 .build();
         UserStock saveStock = memberStockRepository.save(userStock);
@@ -78,11 +80,17 @@ public class MemberStockService {
                         .avgPrice(stock.getAvgPrice())
                         .quantity(stock.getQuantity())
                         .totalAmount(stock.getAvgPrice().multiply(stock.getQuantity().setScale(2,RoundingMode.HALF_UP)).stripTrailingZeros().toPlainString())
+                        .type(StockType.detectType(stock.getStockCode()))
                         .build())
                 .toList();
     }
 
-    //동기식 메서드를 비동기 래퍼로 감싸는 작업
+    /**
+     * 내 주식 rag 분석 요청(내 주식 정보 + 해당 회사 뉴스 데이터)
+     * 동기식 메서드를 비동기 래퍼로 감싸는 작업
+     * @param memberId
+     * @return
+     */
     @Transactional
     public Mono<String> getMyStockAnalysis(String memberId){
         // 2. FastAPI와 비동기 통신
@@ -93,7 +101,8 @@ public class MemberStockService {
                         System.out.println("종목명/코드: " + stock.getStockCode() +
                                 ", 평단가: " + stock.getAvgPrice() +
                                 ", 수량: " + stock.getQuantity() +
-                                ", 총액: " + stock.getTotalAmount());
+                                ", 총액: " + stock.getTotalAmount() +
+                                ", 타입: " + StockType.detectType(stock.getStockCode()));
                     });
                     System.out.println("===============================");
         List<String> list = memberStock.stream()

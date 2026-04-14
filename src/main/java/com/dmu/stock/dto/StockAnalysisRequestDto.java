@@ -1,5 +1,6 @@
 package com.dmu.stock.dto;
 
+import com.dmu.stock.entity.enums.StockType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,5 +16,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StockAnalysisRequestDto {
     private String stockCode;
-    private String ticker;
+    private StockType type;
 }

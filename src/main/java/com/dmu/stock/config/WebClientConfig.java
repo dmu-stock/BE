@@ -45,8 +45,12 @@ public class WebClientConfig {
     @Bean
     public WebClient fastapiWebClient(WebClient.Builder builder) {
 
+        //ai 분석 응답 대기 60초
         HttpClient longTimeOutClient = HttpClient.create()
-                .responseTimeout(Duration.ofSeconds(60));
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
+                .responseTimeout(Duration.ofSeconds(60))
+                .doOnConnected(conn -> conn
+                        .addHandlerLast(new ReadTimeoutHandler(60, TimeUnit.SECONDS)));
         return builder
                 .baseUrl("http://localhost:8000") // FastAPI 서버 주소
                 .clientConnector(new ReactorClientHttpConnector(longTimeOutClient))

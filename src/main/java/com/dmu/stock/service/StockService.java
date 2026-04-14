@@ -9,9 +9,11 @@ import com.dmu.stock.client.naver.NewsAnalysisRequestDto;
 import com.dmu.stock.config.WebClientConfig;
 import com.dmu.stock.dto.NodeStockRequestDto;
 import com.dmu.stock.dto.StockAnalysisRequestDto;
+import com.dmu.stock.entity.enums.StockType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -37,20 +39,17 @@ public class StockService {
 
     /**
      * FastAPI에게 주식 가격 추이 분석 요청
-     * @param requestDto
+     * @param
      * @return
      */
-    public Mono<String> getStockAnalysis(NodeStockRequestDto requestDto){
+    public Mono<String> getStockAnalysis(String stockCode){
         StockAnalysisRequestDto stockAnalysisRequestDto;
-        if(requestDto.isOverseas()){
+
             stockAnalysisRequestDto = StockAnalysisRequestDto.builder()
-                    .ticker(requestDto.getCode())
+                    .stockCode(stockCode)
+                    .type(StockType.detectType(stockCode))
                     .build();
-        }else{
-            stockAnalysisRequestDto = StockAnalysisRequestDto.builder()
-                    .stockCode(requestDto.getCode())
-                    .build();
-        }
+
         return fastApiClient.analyzeStock(stockAnalysisRequestDto);
     }
 }

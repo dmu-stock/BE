@@ -28,7 +28,4 @@ public class StockRequestDto {
 
     @Positive(message = "수량은 0보다 커야 합니다.")
     private BigDecimal quantity;
-
-    @NotNull(message = "주식 타입(KOREA/USA)은 필수입니다.")
-    private StockType type;
 }

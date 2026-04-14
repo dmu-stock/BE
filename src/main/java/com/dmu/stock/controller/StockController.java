@@ -34,12 +34,12 @@ public class StockController {
     }
     /**
      * FastAPI에게 주식 가격 추이 분석 요청
-     * @param requestDto
+     * @param stockCode
      * @return
      */
     @GetMapping("/analyze")
-    public Mono<ResponseEntity<ApiResponse<String>>> getStockAnalysis(@RequestBody NodeStockRequestDto requestDto){
-        return stockService.getStockAnalysis(requestDto) // Mono<String>이 넘어옴
+    public Mono<ResponseEntity<ApiResponse<String>>> getStockAnalysis(@PathVariable String stockCode){
+        return stockService.getStockAnalysis(stockCode) // Mono<String>이 넘어옴
                 .map(summary -> ResponseEntity.ok(
                         ApiResponse.success(SuccessType.INQUERY_SUCCESS, summary)
                 ));
