@@ -8,6 +8,6 @@ import java.util.List;
 @Builder
 @Getter
 public class RagMyStockRequestDto {
-    private List<StockResponseDto> memberStock;
-    private List<String> newsForRag;
+    private List<StockResFastDto> memberStock;
+
 }

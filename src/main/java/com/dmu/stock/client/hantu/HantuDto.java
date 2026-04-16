@@ -40,6 +40,33 @@ public class HantuDto {
 
             @JsonProperty("prdy_ctrt") // 등락률
             private String prdy_ctrt;
+
+            public double getNumericPrice() {
+                return parseDoubleSafe(stck_prpr);
+            }
+
+            public double getNumericChange() {
+                return parseDoubleSafe(prdy_vrss);
+            }
+
+            public double getNumericRate() {
+                return parseDoubleSafe(prdy_ctrt);
+            }
+
+            public long getNumericMarketCap() {
+                try {
+                    return Long.parseLong(hts_avls);
+                } catch (NumberFormatException e) {
+                    return 0L;
+                }
+            }
+            private double parseDoubleSafe(String value) {
+                try {
+                    return (value == null || value.isEmpty()) ? 0.0 : Double.parseDouble(value);
+                } catch (NumberFormatException e) {
+                    return 0.0;
+                }
+            }
         }
     }
 }

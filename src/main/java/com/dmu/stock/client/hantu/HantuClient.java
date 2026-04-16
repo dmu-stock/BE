@@ -1,5 +1,6 @@
 package com.dmu.stock.client.hantu;
 
+import com.dmu.stock.entity.enums.StockType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -68,18 +69,37 @@ public class HantuClient {
     }
 
     // 현재가 조회하기 (삼성전자 종목번호: 005930)
-    public HantuDto.PriceResponse getStockPrice(String stockCode, String token) {
+    public HantuDto.PriceResponse getStockPrice(String stockCode, StockType type) {
+        String validToken = getValidToken();
+        boolean isUsa = "USA".equals(type);
+
+        String path = isUsa
+                ? "/uapi/overseas-stock/v1/quotations/price"  // 미국 주식 경로
+                : "/uapi/domestic-stock/v1/quotations/inquire-price"; // 국내 주식 경로
+
+        String trId = isUsa ? "HHDFS00000300" : "FHKST01010100";
         return hantuWebClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/uapi/domestic-stock/v1/quotations/inquire-price")
-                        .queryParam("FID_COND_SCRN_NO", "0000")
-                        .queryParam("FID_INPUT_ISCD", stockCode)
-                        .queryParam("FID_COND_MRKT_DIV_CODE", "J")
-                        .build())
-                .header("authorization", "Bearer " + token)
+                .uri(uriBuilder -> {
+                        uriBuilder.path(path);
+                        if(isUsa){
+                            uriBuilder.queryParam("AUTH", "")
+                                    .queryParam("EXCD", "NAS") // 일단 나스닥 고정 (IREN은 나스닥)
+                                    .queryParam("SYMB", stockCode);
+
+                        }
+                    else{
+                        uriBuilder.queryParam("FID_COND_SCRN_NO", "0000")
+                                .queryParam("FID_INPUT_ISCD", stockCode)
+                                .queryParam("FID_COND_MRKT_DIV_CODE", "J");
+
+                    }
+                    return uriBuilder.build();
+                })
+                .header("Content-Type", "application/json")
+                .header("authorization", "Bearer " + validToken)
                 .header("appkey", appKey)
                 .header("appsecret", appSecret)
-                .header("tr_id", "FHKST01010100") // 현재가 조회용 ID
+                .header("tr_id", trId) // 현재가 조회용 ID
                 .header("custtype", "P") //개인 회원
                 .retrieve()
                 .bodyToMono(HantuDto.PriceResponse.class)

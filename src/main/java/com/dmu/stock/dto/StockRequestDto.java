@@ -24,8 +24,10 @@ public class StockRequestDto {
     private String stockCode;
 
     @Positive(message = "평단가는 0보다 커야 합니다.")
-    private BigDecimal avgPrice;
+    private double avgPrice;
 
     @Positive(message = "수량은 0보다 커야 합니다.")
-    private BigDecimal quantity;
+    private double quantity;
+
+    private StockType type;
 }

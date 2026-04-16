@@ -23,9 +23,9 @@ public class UserStock {
 
     private String stockCode; // 종목코드
 
-    private BigDecimal avgPrice; // 평단가
+    private double avgPrice; // 평단가
 
-    private BigDecimal quantity; //수량
+    private double quantity; //수량
 
     @Enumerated(EnumType.STRING)
     private StockType type; //국내, 미국주식 구분

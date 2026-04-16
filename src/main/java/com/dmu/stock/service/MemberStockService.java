@@ -1,9 +1,12 @@
 package com.dmu.stock.service;
 
 import com.dmu.stock.client.fastapi.FastApiClient;
+import com.dmu.stock.client.hantu.HantuClient;
+import com.dmu.stock.client.hantu.HantuDto;
 import com.dmu.stock.dto.RagMyStockRequestDto;
 import com.dmu.stock.dto.StockRequestDto;
-import com.dmu.stock.dto.StockResponseDto;
+import com.dmu.stock.dto.StockResDto;
+import com.dmu.stock.dto.StockResFastDto;
 import com.dmu.stock.entity.Member;
 import com.dmu.stock.entity.UserStock;
 import com.dmu.stock.entity.enums.StockType;
@@ -27,6 +30,7 @@ public class MemberStockService {
     private final MemberRepository memberRepository;
     private final AnalyzeNewsService analyzeNewsService;
     private final FastApiClient fastApiClient;
+    private final HantuClient hantuClient;
 
     /**
      * member별 관심종목 등록
@@ -34,7 +38,7 @@ public class MemberStockService {
      * @return
      */
     @Transactional
-    public StockResponseDto saveMemberStock(StockRequestDto request){
+    public StockResDto saveMemberStock(StockRequestDto request){
         //유저 아이디로 유저 찾고 없으면 새로 등록
         Member member = memberRepository.findByMemberId(request.getMemberId())
                 .orElseGet(() -> {
@@ -57,11 +61,11 @@ public class MemberStockService {
                 .build();
         UserStock saveStock = memberStockRepository.save(userStock);
 
-        return StockResponseDto.builder()
+        return StockResDto.builder()
                 .stockCode(saveStock.getStockCode())
                 .avgPrice(saveStock.getAvgPrice())
                 .quantity(saveStock.getQuantity())
-                .totalAmount(saveStock.getAvgPrice().multiply(saveStock.getQuantity().setScale(2,RoundingMode.HALF_UP)).stripTrailingZeros().toPlainString())
+                .totalAmount(saveStock.getAvgPrice())
                 .build();
     }
 
@@ -71,15 +75,15 @@ public class MemberStockService {
      * @return
      */
     @Transactional
-    public List<StockResponseDto> getMemberStock(String memberId){
+    public List<StockResDto> getMemberStock(String memberId){
         List<UserStock> getStock = memberStockRepository.findByMemberId(memberId);
 
         return getStock.stream()
-                .map(stock -> StockResponseDto.builder()
+                .map(stock -> StockResDto.builder()
                         .stockCode(stock.getStockCode())
                         .avgPrice(stock.getAvgPrice())
                         .quantity(stock.getQuantity())
-                        .totalAmount(stock.getAvgPrice().multiply(stock.getQuantity().setScale(2,RoundingMode.HALF_UP)).stripTrailingZeros().toPlainString())
+                        .totalAmount(stock.getAvgPrice())
                         .type(StockType.detectType(stock.getStockCode()))
                         .build())
                 .toList();
@@ -93,27 +97,29 @@ public class MemberStockService {
      */
     @Transactional
     public Mono<String> getMyStockAnalysis(String memberId){
-        // 2. FastAPI와 비동기 통신
+        // FastAPI와 비동기 통신
         return Mono.fromCallable(() -> {
-        List<StockResponseDto> memberStock = getMemberStock(memberId);
-                    System.out.println("======= 내 주식 리스트 확인 =======");
-                    memberStock.forEach(stock -> {
-                        System.out.println("종목명/코드: " + stock.getStockCode() +
-                                ", 평단가: " + stock.getAvgPrice() +
-                                ", 수량: " + stock.getQuantity() +
-                                ", 총액: " + stock.getTotalAmount() +
-                                ", 타입: " + StockType.detectType(stock.getStockCode()));
-                    });
-                    System.out.println("===============================");
-        List<String> list = memberStock.stream()
-                .map(StockResponseDto::getStockCode)
-                .toList();
+            List<StockResDto> memberStock = getMemberStock(memberId);
+                    List<StockResFastDto> fastDtoList = memberStock.stream()
+                            .map(stock -> {
 
-        List<String> newsForRag = analyzeNewsService.getNewsByName(list);
+                                HantuDto.PriceResponse priceInfo = hantuClient.getStockPrice(stock.getStockCode(),stock.getType());
+
+                                return StockResFastDto.builder()
+                                        .stockCode(stock.getStockCode())
+                                        .avgPrice(stock.getAvgPrice())
+                                        .quantity(stock.getQuantity())
+                                        .type(StockType.detectType(stock.getStockCode()))
+                                        .currentPrice(priceInfo.getOutput().getNumericPrice())
+                                        .changePrice(priceInfo.getOutput().getNumericChange())
+                                        .changeRate(priceInfo.getOutput().getNumericRate())
+                                        .marketCap(priceInfo.getOutput().getNumericMarketCap())
+                                        .build();
+                            })
+                            .toList();
 
         return RagMyStockRequestDto.builder()
-                .memberStock(memberStock)
-                .newsForRag(newsForRag)
+                .memberStock(fastDtoList)
                 .build();
         //리소스 병목 현상 방지 :
         }).subscribeOn(Schedulers.boundedElastic())
