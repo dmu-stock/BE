@@ -18,7 +18,7 @@ import java.util.Date;
 public class JWTProvider {
     private final SecretKey secretKey;
 
-    public JWTProvider(@Value("${spring.jwt.secretkey}") String secretKey) {
+    public JWTProvider(@Value("${jwt.secret.key}") String secretKey) {
         this.secretKey = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
