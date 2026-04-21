@@ -16,9 +16,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class StockRequestDto {
-    private String memberId;
-
-    private String memberName;
+    private String email;
 
     @NotBlank(message = "종목 코드는 필수입니다.")
     private String stockCode;

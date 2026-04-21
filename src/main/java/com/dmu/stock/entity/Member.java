@@ -17,13 +17,19 @@ public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
-    private String memberId;
+    private String email;
 
-    private String memberName;
+    private String password;
+
+    private String name;
+
+    private String phone;
 
     private LocalDateTime createdAt;
+
+    private String refreshToken;
 
     @OneToMany(mappedBy = "member")
     private List<UserStock> userStocks = new ArrayList<>();
@@ -31,6 +37,10 @@ public class Member {
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    public void updateRefreshToken(String refreshToken){
+        this.refreshToken = refreshToken;
     }
 
 }

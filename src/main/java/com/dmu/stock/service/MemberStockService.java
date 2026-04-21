@@ -28,7 +28,6 @@ import java.util.List;
 public class MemberStockService {
     private final MemberStockRepository memberStockRepository;
     private final MemberRepository memberRepository;
-    private final AnalyzeNewsService analyzeNewsService;
     private final FastApiClient fastApiClient;
     private final HantuClient hantuClient;
 
@@ -39,19 +38,9 @@ public class MemberStockService {
      */
     @Transactional
     public StockResDto saveMemberStock(StockRequestDto request){
-        //유저 아이디로 유저 찾고 없으면 새로 등록
-        Member member = memberRepository.findByMemberId(request.getMemberId())
-                .orElseGet(() -> {
-                    try{
-                        Member newMember = Member.builder()
-                                .memberId(request.getMemberId())
-                                .memberName(request.getMemberName())
-                                .build();
-                        return memberRepository.save(newMember);
-                    } catch (Exception e) {
-                        throw new CustomException(ErrorType.DATABASE_ERROR);
-                    }
-                });
+        Member member = memberRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new CustomException(ErrorType.MEMBER_NOT_FOUND));
+
         UserStock userStock = UserStock.builder()
                 .stockCode(request.getStockCode())
                 .avgPrice(request.getAvgPrice())
@@ -71,12 +60,13 @@ public class MemberStockService {
 
     /**
      * 관심 종목 조회
-     * @param memberId
+     * @param email
      * @return
      */
     @Transactional
-    public List<StockResDto> getMemberStock(String memberId){
-        List<UserStock> getStock = memberStockRepository.findByMemberId(memberId);
+    public List<StockResDto> getMemberStock(String email){
+        Member member = memberRepository.findByEmail(email).orElseThrow();
+        List<UserStock> getStock = member.getUserStocks();
 
         return getStock.stream()
                 .map(stock -> StockResDto.builder()

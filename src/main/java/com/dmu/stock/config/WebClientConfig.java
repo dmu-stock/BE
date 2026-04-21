@@ -34,13 +34,13 @@ public class WebClientConfig {
                 .build();
     }
 
-    @Bean
-    public WebClient dartWebClient(WebClient.Builder builder) {
-        return builder
-                .baseUrl("https://opendart.fss.or.kr")
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .build();
-    }
+//    @Bean
+//    public WebClient dartWebClient(WebClient.Builder builder) {
+//        return builder
+//                .baseUrl("https://opendart.fss.or.kr")
+//                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+//                .build();
+//    }
 
     @Bean
     public WebClient fastapiWebClient(WebClient.Builder builder) {
@@ -67,13 +67,13 @@ public class WebClientConfig {
                 .build();
     }
 
-    // 네이버 뉴스 검색 API용 클라이언트
-    @Bean
-    public WebClient naverWebClient(WebClient.Builder builder) {
-        return builder
-                .baseUrl("https://openapi.naver.com")
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .build();
-    }
+//    // 네이버 뉴스 검색 API용 클라이언트
+//    @Bean
+//    public WebClient naverWebClient(WebClient.Builder builder) {
+//        return builder
+//                .baseUrl("https://openapi.naver.com")
+//                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+//                .build();
+//    }
 
 }

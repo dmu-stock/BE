@@ -1,14 +1,8 @@
 package com.dmu.stock.client.fastapi;
 
-import com.dmu.stock.client.naver.NewsAnalysisRequestDto;
-import com.dmu.stock.config.WebClientConfig;
 import com.dmu.stock.dto.RagMyStockRequestDto;
 import com.dmu.stock.dto.StockAnalysisRequestDto;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -23,13 +17,6 @@ public class FastApiClient {
         this.fastapiWebClient = fastapiWebClient;
     }
 
-    public Mono<String> analyzeNews(NewsAnalysisRequestDto requestDto) {
-        return fastapiWebClient.post()
-                .uri("/api/v1/NewsAnalysis")
-                .bodyValue(requestDto)
-                .retrieve()
-                .bodyToMono(String.class);
-    }
 
     public Mono<String> analyzeMyStock(RagMyStockRequestDto dto) {
         return fastapiWebClient.post()

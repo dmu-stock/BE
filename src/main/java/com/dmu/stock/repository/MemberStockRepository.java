@@ -13,6 +13,7 @@ public interface MemberStockRepository extends JpaRepository<UserStock,Long> {
 
 //    Optional<UserStock> findByMember_MemberId(String memberId);
 
-    @Query("SELECT us FROM UserStock us WHERE us.member.memberId = :memberId")
-    List<UserStock> findByMemberId(@Param("memberId") String memberId);
+//    @Query("SELECT us FROM UserStock us WHERE us.member.memberId = :memberId")
+//    List<UserStock> findByMemberId(@Param("memberId") String memberId);
+    List<UserStock> findByMember_Email(String email);
 }
