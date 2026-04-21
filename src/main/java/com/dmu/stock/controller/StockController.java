@@ -27,11 +27,11 @@ public class StockController {
      * @param stockCode
      * @return
      */
-//    @GetMapping("/{stockCode}")
-//    public ResponseEntity<ApiResponse<HantuDto.PriceResponse>> getStockInfo(@PathVariable String stockCode){
-//        HantuDto.PriceResponse stockInfo = stockService.getStockInfo(stockCode);
-//        return ResponseEntity.ok(ApiResponse.success(SuccessType.INQUERY_SUCCESS,stockInfo));
-//    }
+    @GetMapping("/{stockCode}")
+    public ResponseEntity<ApiResponse<HantuDto.PriceResponse>> getStockInfo(@PathVariable String stockCode){
+        HantuDto.PriceResponse stockInfo = stockService.getStockInfo(stockCode);
+        return ResponseEntity.ok(ApiResponse.success(SuccessType.INQUERY_SUCCESS,stockInfo));
+    }
     /**
      * FastAPI에게 주식 가격 추이 분석 요청
      * @param stockCode

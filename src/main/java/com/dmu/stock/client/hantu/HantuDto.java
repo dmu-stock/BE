@@ -41,8 +41,13 @@ public class HantuDto {
             @JsonProperty("prdy_ctrt") // 등락률
             private String prdy_ctrt;
 
+            // --- 미국 주식 필드 추가 ---
+            @JsonProperty("last") private String last; // 현재가 (미국)
+            @JsonProperty("rate") private String rate; // 등락률 (미국)
+
             public double getNumericPrice() {
-                return parseDoubleSafe(stck_prpr);
+                String price = (last != null) ? last : stck_prpr;
+                return parseDoubleSafe(price);
             }
 
             public double getNumericChange() {
@@ -50,7 +55,8 @@ public class HantuDto {
             }
 
             public double getNumericRate() {
-                return parseDoubleSafe(prdy_ctrt);
+                String r = (rate != null) ? rate : prdy_ctrt;
+                return parseDoubleSafe(r);
             }
 
             public long getNumericMarketCap() {

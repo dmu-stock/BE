@@ -32,9 +32,9 @@ public class StockService {
      * @param stockCode
      * @return
      */
-//    public HantuDto.PriceResponse getStockInfo(String stockCode){
-//        return hantuClient.getStockPrice(stockCode);
-//    }
+    public HantuDto.PriceResponse getStockInfo(String stockCode){
+        return hantuClient.getStockPrice(stockCode);
+    }
 
     /**
      * FastAPI에게 주식 가격 추이 분석 요청

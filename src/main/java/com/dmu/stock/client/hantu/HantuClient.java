@@ -28,16 +28,30 @@ public class HantuClient {
         this.hantuWebClient = hantuWebClient;
     }
 
-    private String accessToken; // 메모리에 토큰 저장
-    private LocalDateTime expiryTime; // 만료 시간 체크용
+    private volatile String accessToken; // 메모리에 토큰 저장
+    private volatile LocalDateTime expiryTime; // 만료 시간 체크용
 
+
+    /**
+     * 서버 시작 시 자동으로 토큰 발급
+     * ApplicationReadyEvent는 모든 빈이 로드되고 앱이 준비되었을 때 실행됩니다.
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void init() {
+        try {
+            log.info(">>> 서버 시작: 한투 API 초기 토큰 발급 시도");
+            refreshAccessToken();
+        } catch (Exception e) {
+            log.error(">>> 초기 토큰 발급 실패! (네트워크 혹은 키 설정 확인 필요): {}", e.getMessage());
+        }
+    }
     /**
      * 한투 토큰 있는지 확인 후 없으면 생성 메서드 실행
      * @return
      */
     public String getValidToken() {
         // 토큰이 없거나, 만료시간이 1분 남았을 때 새로 갱신
-        if (accessToken == null || LocalDateTime.now().isAfter(expiryTime.minusMinutes(1))) {
+        if (accessToken == null ||expiryTime == null || LocalDateTime.now().isAfter(expiryTime.minusMinutes(1))) {
             refreshAccessToken();
         }
         return accessToken;
@@ -56,25 +70,27 @@ public class HantuClient {
         log.info("한투 API 토큰 갱신 중...");
 
         HantuDto.TokenResponse res = hantuWebClient.post()
-                .uri("https://openapi.koreainvestment.com:9443/oauth2/tokenP")
+                .uri("https://openapivts.koreainvestment.com:29443/oauth2/tokenP")
                 .bodyValue(body)
                 .retrieve()
                 .bodyToMono(HantuDto.TokenResponse.class)
                 .block();
-
-        this.accessToken = res.getAccess_token();
-        log.info("토큰 발급 성공 . . . 유효시간: {}초", res.getExpires_in());
-        // 유효 시간을 계산해서 저장 (보통 86400초 등)
-        this.expiryTime = LocalDateTime.now().plusSeconds(res.getExpires_in());
+        if (res != null && res.getAccess_token() != null) {
+            this.accessToken = res.getAccess_token();
+            this.expiryTime = LocalDateTime.now().plusSeconds(res.getExpires_in());
+            log.info("토큰 발급 성공 . . . 유효시간: {}초", res.getExpires_in());
+        }else{
+            log.error("토큰 발급 실패: 응답 데이터가 없습니다.");
+        }
     }
 
     // 현재가 조회하기 (삼성전자 종목번호: 005930)
-    public HantuDto.PriceResponse getStockPrice(String stockCode, StockType type) {
-        String validToken = getValidToken();
-        boolean isUsa = "USA".equals(type);
+    public HantuDto.PriceResponse getStockPrice(String stockCode) {
+        StockType type = StockType.detectType(stockCode);
+        boolean isUsa = (type == StockType.USA);
 
         String path = isUsa
-                ? "/uapi/overseas-stock/v1/quotations/price"  // 미국 주식 경로
+                ? "/uapi/overseas-price/v1/quotations/price"  // 미국 주식 경로
                 : "/uapi/domestic-stock/v1/quotations/inquire-price"; // 국내 주식 경로
 
         String trId = isUsa ? "HHDFS00000300" : "FHKST01010100";
@@ -83,7 +99,7 @@ public class HantuClient {
                         uriBuilder.path(path);
                         if(isUsa){
                             uriBuilder.queryParam("AUTH", "")
-                                    .queryParam("EXCD", "NAS") // 일단 나스닥 고정 (IREN은 나스닥)
+                                    .queryParam("EXCD", "NAS")
                                     .queryParam("SYMB", stockCode);
 
                         }
@@ -96,7 +112,7 @@ public class HantuClient {
                     return uriBuilder.build();
                 })
                 .header("Content-Type", "application/json")
-                .header("authorization", "Bearer " + validToken)
+                .header("authorization", "Bearer " + accessToken)
                 .header("appkey", appKey)
                 .header("appsecret", appSecret)
                 .header("tr_id", trId) // 현재가 조회용 ID

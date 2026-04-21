@@ -103,7 +103,7 @@ public class MemberStockService {
                     List<StockResFastDto> fastDtoList = memberStock.stream()
                             .map(stock -> {
 
-                                HantuDto.PriceResponse priceInfo = hantuClient.getStockPrice(stock.getStockCode(),stock.getType());
+                                HantuDto.PriceResponse priceInfo = hantuClient.getStockPrice(stock.getStockCode());
 
                                 return StockResFastDto.builder()
                                         .stockCode(stock.getStockCode())
