@@ -75,4 +75,40 @@ public class HantuDto {
             }
         }
     }
+
+    @Data
+    public static class BalanceResponse {
+        private String rt_cd;   // 성공 실패 여부 (0: 성공)
+        private String msg_cd;  // 응답 코드
+        private String msg1;    // 응답 메시지
+
+        @JsonProperty("output1")
+        private List<StockBalanceResponse> output1; // 종목 리스트
+    }
+    @Data
+    public static class StockBalanceResponse {
+        @JsonProperty("pdno")
+        private String pdno;            // 종목번호 (상품번호)
+
+        @JsonProperty("prdt_name")
+        private String prdtName;        // 종목명
+
+        @JsonProperty("hldg_qty")
+        private String hldgQty;         // 보유수량
+
+        @JsonProperty("pchs_avg_pric")
+        private String pchsAvgPric;     // 매입평균가격 (내 평단가)
+
+        @JsonProperty("prpr")
+        private String prpr;            // 현재가
+
+        @JsonProperty("evlu_pfls_amt")
+        private String evluPflsAmt;     // 평가손익금액 (수익금)
+
+        @JsonProperty("evlu_pfls_rt")
+        private String evluPflsRt;      // 평가손익률 (수익률 %)
+
+        @JsonProperty("evlu_amt")
+        private String evluAmt;         // 평가금액 (현재 가치 합계)
+    }
 }

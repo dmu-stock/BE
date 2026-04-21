@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -111,7 +113,6 @@ public class HantuClient {
                     }
                     return uriBuilder.build();
                 })
-                .header("Content-Type", "application/json")
                 .header("authorization", "Bearer " + accessToken)
                 .header("appkey", appKey)
                 .header("appsecret", appSecret)
@@ -119,6 +120,39 @@ public class HantuClient {
                 .header("custtype", "P") //개인 회원
                 .retrieve()
                 .bodyToMono(HantuDto.PriceResponse.class)
+                .block();
+    }
+    public List<HantuDto.StockBalanceResponse> getMyBalance(){
+        return hantuWebClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/uapi/domestic-stock/v1/trading/inquire-balance")
+                        .queryParam("CANO", "50183571")
+                        .queryParam("ACNT_PRDT_CD", "01")
+                        .queryParam("AFHR_FLPR_YN", "N")
+                        .queryParam("OFL_YN", "")
+                        .queryParam("INQR_DVSN", "01") // 01: 종목별 합산
+                        .queryParam("UNPR_DVSN", "01")
+                        .queryParam("FUND_STTL_ICLD_YN", "N")
+                        .queryParam("FSRB_RESA_ET_ICLD_YN", "N")
+                        .queryParam("FNCG_AMT_AUTO_RDPT_YN", "N") // 융자상환여부
+                        .queryParam("PRCS_DVSN", "00")
+                        .queryParam("CTX_AREA_FK100", "")
+                        .queryParam("CTX_AREA_NK100", "")// 처리구분 (00: 전일매매포함)
+                        .build())
+                .header("authorization", "Bearer " + accessToken)
+                .header("appkey", appKey)
+                .header("appsecret", appSecret)
+                .header("tr_id", "VTTC8434R") // 모의투자용
+                .header("custtype", "P")
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, clientResponse ->
+                        clientResponse.bodyToMono(String.class).map(body -> {
+                            log.error("잔고조회 실패 상세 사유: {}", body);
+                            return new RuntimeException("Hantu API Error");
+                        })
+                )
+                .bodyToMono(HantuDto.BalanceResponse.class)
+                .map(res -> res.getOutput1())
                 .block();
     }
 }

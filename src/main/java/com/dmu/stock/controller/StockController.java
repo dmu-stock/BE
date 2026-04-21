@@ -1,5 +1,6 @@
 package com.dmu.stock.controller;
 
+import com.dmu.stock.client.hantu.HantuClient;
 import com.dmu.stock.client.hantu.HantuDto;
 import com.dmu.stock.client.naver.NaverNewsResponseDto;
 import com.dmu.stock.common.ApiResponse;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class StockController {
 
     private final StockService stockService;
+    private final HantuClient hantuClient;
 
     /**
      * 단순 주식 가격 및 정보 반환(한투 API)
@@ -31,6 +33,11 @@ public class StockController {
     public ResponseEntity<ApiResponse<HantuDto.PriceResponse>> getStockInfo(@PathVariable String stockCode){
         HantuDto.PriceResponse stockInfo = stockService.getStockInfo(stockCode);
         return ResponseEntity.ok(ApiResponse.success(SuccessType.INQUERY_SUCCESS,stockInfo));
+    }
+    @GetMapping("/balance")
+    public ResponseEntity<ApiResponse<List<HantuDto.StockBalanceResponse>>> getMyBalance(){
+        List<HantuDto.StockBalanceResponse> myBalance = hantuClient.getMyBalance();
+        return ResponseEntity.ok(ApiResponse.success(SuccessType.INQUERY_SUCCESS,myBalance));
     }
     /**
      * FastAPI에게 주식 가격 추이 분석 요청

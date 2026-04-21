@@ -62,7 +62,7 @@ public class WebClientConfig {
     @Bean
     public WebClient hantuWebClient(WebClient.Builder builder) {
         return builder
-                .baseUrl("https://openapi.koreainvestment.com:9443")
+                .baseUrl("https://openapivts.koreainvestment.com:29443")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                 .build();
     }
