@@ -1,14 +1,11 @@
 package com.dmu.stock.controller;
 
-import com.dmu.stock.client.hantu.HantuDto;
 import com.dmu.stock.common.ApiResponse;
 import com.dmu.stock.common.SuccessType;
 import com.dmu.stock.dto.StockRequestDto;
 import com.dmu.stock.dto.StockResDto;
 import com.dmu.stock.service.MemberStockService;
-import com.dmu.stock.util.JwtUtil;
-import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.HttpServletRequest;
+import com.dmu.stock.jwt.JwtUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberStockController {
     private final MemberStockService memberStockService;
-    private final JwtUtil jwtUtil;
 
     @PostMapping
     public ResponseEntity<ApiResponse<StockResDto>> saveMemberStock(@Valid @RequestBody StockRequestDto requestDto){
@@ -35,9 +31,8 @@ public class MemberStockController {
         return ResponseEntity.ok(ApiResponse.success(SuccessType.INQUERY_SUCCESS,getStockList));
     }
     @GetMapping("/analyze/{memberId}")
-    public Mono<ResponseEntity<ApiResponse<String>>> getMyStockAnalysis(HttpServletRequest request){
-        String token = jwtUtil.extractToken(request);
-        String email = jwtUtil.validateAccessToken(token).getSubject();
+    public Mono<ResponseEntity<ApiResponse<String>>> getMyStockAnalysis(@PathVariable String email){
+
         return memberStockService.getMyStockAnalysis(email) // Mono<String>이 넘어옴
                 .map(summary -> ResponseEntity.ok(
                         ApiResponse.success(SuccessType.INQUERY_SUCCESS, summary)

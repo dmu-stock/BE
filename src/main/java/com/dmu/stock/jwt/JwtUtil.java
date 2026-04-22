@@ -1,10 +1,6 @@
-package com.dmu.stock.util;
+package com.dmu.stock.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +30,7 @@ public class JwtUtil {
     public String generateAccessToken(String userEmail) {
         return Jwts.builder()
                 .subject(userEmail)
+                .claim("category", "access")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TIME))
                 .signWith(secretKey)
@@ -44,26 +41,58 @@ public class JwtUtil {
     public  String generateRefreshToken(String userEmail) {
         return Jwts.builder()
                 .subject(userEmail)
+                .claim("category", "refresh")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME))
                 .signWith(secretKey)
                 .compact();
     }
 
+    // 유저 이메일 추출
+    public String getUsernameFromToken(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject(); // subject로 저장했으니 getSubject()로 가져옴
+    }
+
     // Access Token 검증
-    public Claims validateAccessToken(String accessToken) {
+    public boolean validateToken(String accessToken, String expectedCategory) {
         try {
-            return Jwts.parser()
+            Claims claims = Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
                     .parseSignedClaims(accessToken)
                     .getPayload();
+
+            String category = claims.get("category", String.class);
+            if (category == null || !category.equals(expectedCategory)) {
+                log.error("토큰 카테고리 불일치. 기대값: {}, 실제값: {}", expectedCategory, category);
+                return false;
+            }
+
+            return true;
+        } catch (ExpiredJwtException e) {
+            log.error("만료된 토큰입니다.");
         } catch (Exception e) {
-            log.error("토큰 검증 실패: {}", e.getMessage());
-            return null;
+            log.error("유효하지 않은 토큰입니다: {}", e.getMessage());
         }
+        return false;
     }
 
+    // Access Token 전용
+    public boolean validateAccessToken(String token) {
+        return validateToken(token, "access");
+    }
+
+    // Refresh Token 전용 (재발급 컨트롤러에서 사용)
+    public boolean validateRefreshToken(String token) {
+        return validateToken(token, "refresh");
+    }
+
+    //헤더에서 토큰 추출
     public String extractToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
 
@@ -75,5 +104,12 @@ public class JwtUtil {
         }
 
         return authHeader.substring(7); // "Bearer " 제거 후 순수 토큰만 반환
+    }
+
+    // 로그아웃용 잔여 시간 계산 (추후 redis 및 블랙리스트 기능 추가할 때 사용 예정)
+    public long getRemainingMillis(String token) {
+        Date expiration = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token)
+                .getPayload().getExpiration();
+        return expiration.getTime() - System.currentTimeMillis();
     }
 }
